@@ -1,0 +1,23 @@
+name: CI/CD Deployment
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to ECR
+        run: |
+          aws ecr get-authorization-token --region $AWS_REGION --output text | docker login --username AWS --password-stdin $AWS_ECR_LOGIN_URI
+      - name: Build Docker image
+        run: |
+          docker build -t $AWS_ECR_LOGIN_URI/$ECR_REPOSITORY_NAME .
+      - name: Push Docker image to ECR
+        run: |
+          docker push $AWS_ECR_LOGIN_URI/$ECR_REPOSITORY_NAME
+      - name: Deploy to EC2
+        run:
+
